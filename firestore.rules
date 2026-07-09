@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSuper() {
+      return request.auth != null && request.auth.token.role == 'superadmin';
+    }
+    // The current user owns a card when its createdBy matches their uid.
+    function isOwner() {
+      return request.auth != null && request.auth.uid == resource.data.createdBy;
+    }
+    // A new card must be stamped with the creator's own uid.
+    function isCreatingOwn() {
+      return request.auth != null
+        && request.auth.uid == request.resource.data.createdBy;
+    }
+    match /contactCards/{slug} {
+      // resource == null covers reads of documents that do not exist: they must
+      // return "not found" rather than permission-denied. This also lets the
+      // create transaction probe a free slug before writing it.
+      allow read: if resource == null
+        || resource.data.published == true
+        || isSuper()
+        || isOwner();
+      allow create: if isSuper() || isCreatingOwn();
+      // Ownership cannot be transferred to another user on update.
+      allow update: if isSuper()
+        || (isOwner()
+            && request.resource.data.createdBy == resource.data.createdBy);
+      allow delete: if isSuper() || isOwner();
+    }
+  }
+}

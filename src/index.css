@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Force light form controls; the product UI is light and the public card
+     paints its own themed surfaces, so it must not follow OS dark mode. */
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Manrope", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background-color: #ffffff;
+  color: #141414;
+}
+
+/* Visible focus ring for keyboard users: the single bronze accent. */
+:focus-visible {
+  outline: 2px solid #9c7c52;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Public card (self-contained, themed via CSS variables)             */
+/* ------------------------------------------------------------------ */
+
+/* Dark is the default beacon card temperature. */
+.beacon-card {
+  --bg: #111112;
+  --fg: #f6f5f3;
+  --muted: #a8a7a3;
+  --faint: #7e7d79;
+  --surface: #1a1a1c;
+  --surface-2: #202023;
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.22);
+  --btn-bg: #f6f5f3;
+  --btn-fg: #141414;
+  --bronze: #c19a63;
+
+  background-color: var(--bg);
+  color: var(--fg);
+  min-height: 100%;
+  font-family: "Manrope", system-ui, sans-serif;
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease;
+}
+
+/* Light editorial temperature. */
+.beacon-card[data-theme="light"] {
+  --bg: #ffffff;
+  --fg: #141414;
+  --muted: #5c5c5c;
+  --faint: #8a8a8a;
+  --surface: #f5f2ec;
+  --surface-2: #ece8df;
+  --line: #e6e4df;
+  --line-strong: #d9d6cf;
+  --btn-bg: #141414;
+  --btn-fg: #ffffff;
+  --bronze: #9c7c52;
+}
+
+/* Themed focus ring inside the card. */
+.beacon-card :focus-visible {
+  outline-color: var(--bronze);
+}
+
+/* A quiet ruled grid in the dark card background; near-invisible, adds depth. */
+.beacon-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--line, rgba(255, 255, 255, 0.08)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line, rgba(255, 255, 255, 0.08)) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 75%);
+  opacity: 0.6;
+}
+
+/* Reveal-on-scroll / on-load. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-reveal].is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Honour reduced-motion: no reveal offset, no transitions. */
+@media (prefers-reduced-motion: reduce) {
+  .beacon-card {
+    transition: none;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
