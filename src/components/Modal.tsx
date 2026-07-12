@@ -36,16 +36,19 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/45 p-4 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-50 overflow-y-auto bg-ink/45 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
     >
+      <div
+        className="flex min-h-full items-center justify-center p-4 sm:p-6"
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
+      >
       <div
         ref={panelRef}
         tabIndex={-1}
@@ -65,6 +68,7 @@ export default function Modal({
           </button>
         </div>
         <div className="px-6 py-5">{children}</div>
+      </div>
       </div>
     </div>
   );
