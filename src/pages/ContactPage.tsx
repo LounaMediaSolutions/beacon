@@ -279,11 +279,15 @@ function CardView({ card }: { card: ContactProfile }) {
       {/* Nav */}
       <header className="sticky top-0 z-40 border-b border-[color:var(--line)] bg-[var(--bg)]/85 backdrop-blur">
         <nav className="mx-auto flex w-[min(64rem,calc(100%-2rem))] items-center justify-between py-3.5">
-          <Logo
-            variant="full"
-            tone={theme === "dark" ? "onDark" : "onLight"}
-            className="h-14 w-auto sm:h-16"
-          />
+          <div>
+            {card.logoUrl && (
+              <img
+                src={card.logoUrl}
+                alt={`${card.name} logo`}
+                className="h-14 w-auto object-contain sm:h-16"
+              />
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <ThemeToggle
               theme={theme}
@@ -482,11 +486,13 @@ function CardView({ card }: { card: ContactProfile }) {
         {/* Footer */}
         <footer className="mt-16 flex flex-col gap-4 border-t border-[color:var(--line)] pt-8 text-sm text-[var(--faint)] sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
-            <Logo
-              variant="mark"
-              tone={theme === "dark" ? "onDark" : "onLight"}
-              className="h-10 w-auto sm:h-11"
-            />
+            {card.logoUrl && (
+              <img
+                src={card.logoUrl}
+                alt={`${card.name} logo`}
+                className="h-10 w-auto object-contain sm:h-11"
+              />
+            )}
             <span>
               {card.name}
               {card.company ? ` · ${card.company}` : ""}

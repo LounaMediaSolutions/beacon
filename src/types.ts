@@ -21,6 +21,7 @@ export interface ContactProfile {
   hours: string | null;
   focus: FocusArea[];
   portraitUrl: string | null;
+  logoUrl: string | null;
   published: boolean;
   createdBy: string | null;
   createdAt: number | null;

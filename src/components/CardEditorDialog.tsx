@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import Modal from "./Modal";
 import PortraitField from "./PortraitField";
+import LogoField from "./LogoField";
 import { toSlug } from "../lib/vcard";
 import { createCard, updateCard, DuplicateSlugError } from "../lib/cards";
 import { useToast } from "../context/ToastContext";
@@ -29,6 +30,7 @@ interface FormState {
   bio: string;
   languages: string;
   portraitUrl: string;
+  logoUrl: string;
   focus: FocusArea[];
   published: boolean;
 }
@@ -49,6 +51,7 @@ function emptyForm(): FormState {
     bio: "",
     languages: "",
     portraitUrl: "",
+    logoUrl: "",
     focus: [],
     published: true,
   };
@@ -70,6 +73,7 @@ function fromCard(card: ContactProfile): FormState {
     bio: card.bio ?? "",
     languages: card.languages.join(", "),
     portraitUrl: card.portraitUrl ?? "",
+    logoUrl: card.logoUrl ?? "",
     focus: card.focus.map((f) => ({ ...f })),
     published: card.published,
   };
@@ -98,6 +102,7 @@ export default function CardEditorDialog({
   const [slugTouched, setSlugTouched] = useState(isEdit);
   const [pending, setPending] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { showToast } = useToast();
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -147,6 +152,7 @@ export default function CardEditorDialog({
       return;
     }
     setPending(true);
+    setError(null);
 
     const cleanedFocus = form.focus
       .map((f) => ({ k: f.k.trim(), d: f.d.trim() }))
@@ -171,6 +177,7 @@ export default function CardEditorDialog({
       hours: orNull(form.hours),
       focus: cleanedFocus,
       portraitUrl: orNull(form.portraitUrl),
+      logoUrl: orNull(form.logoUrl),
       published: form.published,
     };
 
@@ -184,11 +191,13 @@ export default function CardEditorDialog({
       }
       onSaved();
       onClose();
-    } catch (error) {
-      if (error instanceof DuplicateSlugError) {
-        showToast("error", "That profile name is already taken.");
+    } catch (err) {
+      if (err instanceof DuplicateSlugError) {
+        setError("That profile URL name is already taken. Please try another one.");
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
-        showToast("error", "Could not save the card. Please try again.");
+        setError("Could not save the card. Please try again.");
       }
     } finally {
       setPending(false);
@@ -202,6 +211,12 @@ export default function CardEditorDialog({
       size="max-w-2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
         <div>
           <label htmlFor="f-name" className={labelClass}>
             Display name <span className="text-red-500">*</span>
@@ -225,8 +240,13 @@ export default function CardEditorDialog({
             onChange={(e) => handleSlugChange(e.target.value)}
             disabled={isEdit}
             aria-describedby="slug-help"
-            className={`${fieldClass} ${isEdit ? "cursor-not-allowed bg-cream" : ""}`}
+            className={`${fieldClass} ${isEdit ? "cursor-not-allowed bg-cream" : ""} ${!validSlug && slugTouched && form.slug.length > 0 ? "border-red-300 focus:border-red-500 focus:ring-red-500/30" : ""}`}
           />
+          {!isEdit && slugTouched && !validSlug && form.slug.length > 0 && (
+            <p className="mt-1.5 text-xs font-medium text-red-500">
+              URL name can only contain lowercase letters, numbers, and hyphens.
+            </p>
+          )}
           <p id="slug-help" className="mt-1.5 text-xs text-ink-faint">
             {isEdit
               ? "The URL name cannot be changed after creation."
@@ -375,6 +395,12 @@ export default function CardEditorDialog({
         <PortraitField
           value={form.portraitUrl}
           onChange={(url) => update("portraitUrl", url)}
+          onBusyChange={setUploadBusy}
+        />
+
+        <LogoField
+          value={form.logoUrl}
+          onChange={(url) => update("logoUrl", url)}
           onBusyChange={setUploadBusy}
         />
 

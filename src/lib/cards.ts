@@ -56,6 +56,7 @@ function fromSnapshot(
     hours: (data.hours as string | null) ?? null,
     focus: Array.isArray(data.focus) ? (data.focus as FocusArea[]) : [],
     portraitUrl: (data.portraitUrl as string | null) ?? null,
+    logoUrl: (data.logoUrl as string | null) ?? null,
     published: data.published !== false,
     createdBy: (data.createdBy as string | null) ?? null,
     createdAt: toMillis(data.createdAt),
@@ -81,6 +82,7 @@ function toDocData(input: ContactProfileInput) {
     hours: input.hours ?? null,
     focus: input.focus ?? [],
     portraitUrl: input.portraitUrl ?? null,
+    logoUrl: input.logoUrl ?? null,
     published: input.published,
   };
 }
